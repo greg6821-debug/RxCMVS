@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout:v4
+      uses: actions/checkout@v4
       with:
         submodules: recursive # Скачиваем зависимости, если они оформлены сабмодулями
 
@@ -44,4 +44,6 @@ jobs:
           build/Release/*.dll
           build/bin/Release/*.exe
           build/bin/Release/*.dll
+          build/**/*.exe
+          build/**/*.dll
         if-no-files-found: warn
