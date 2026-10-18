@@ -1,7 +1,7 @@
 name: Build MGV Editor
 
 on:
-  workflow_dispatch: # Позволяет запускать сборку вручную кнопкой
+  workflow_dispatch:
 
 jobs:
   build:
@@ -27,7 +27,7 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
+        cmake -B build -S src/MGV_Editor -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
 
     - name: Build Project
       run: |
@@ -40,8 +40,4 @@ jobs:
         path: |
           build/Release/*.exe
           build/Release/*.dll
-          build/bin/Release/*.exe
-          build/bin/Release/*.dll
-          build/**/*.exe
-          build/**/*.dll
         if-no-files-found: warn
