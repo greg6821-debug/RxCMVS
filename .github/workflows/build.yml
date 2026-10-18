@@ -27,14 +27,13 @@ jobs:
 
     - name: Fix Broken CMakeLists
       run: |
-        \$content = Get-Content src/MGV_Editor/CMakeLists.txt
-        \$newContent = "cmake_minimum_required(VERSION 3.15)`n" + ($content -join "`n")
-        Set-Content src/MGV_Editor/CMakeLists.txt \$newContent
+        $content = Get-Content src/MGV_Editor/CMakeLists.txt
+        $newContent = "cmake_minimum_required(VERSION 3.15)`n" + ($content -join "`n")
+        Set-Content src/MGV_Editor/CMakeLists.txt $newContent
 
     - name: Configure CMake
       run: |
-        cmake -B build -S src/MGV_Editor -DCMAKE_TOOLCHAIN_FILE="\(env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=\){{ matrix.triplet }}
-
+        cmake -B build -S src/MGV_Editor -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
     - name: Build Project
       run: |
         cmake --build build --config Release
@@ -42,7 +41,7 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: MGV_Editor-\${{ matrix.triplet }}
+        name: MGV_Editor-${{ matrix.triplet }}
         path: |
           build/Release/*.exe
           build/Release/*.dll
