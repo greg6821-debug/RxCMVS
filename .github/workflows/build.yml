@@ -23,7 +23,7 @@ jobs:
     - name: Integrate and Run vcpkg
       run: |
         vcpkg integrate install
-        vcpkg install libvorbis:\${{ matrix.triplet }}
+        vcpkg install libvorbis\${{ matrix.triplet }}
 
     - name: Fix Broken CMakeLists
       run: |
