@@ -27,7 +27,6 @@ jobs:
 
     - name: Fix Broken CMakeLists
       run: |
-        # Дописываем минимальную версию CMake в начало файла, чтобы исправить ошибку автора
         \$content = Get-Content src/MGV_Editor/CMakeLists.txt
         \$newContent = "cmake_minimum_required(VERSION 3.15)`n" + ($content -join "`n")
         Set-Content src/MGV_Editor/CMakeLists.txt \$newContent
