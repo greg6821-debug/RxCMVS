@@ -17,6 +17,15 @@ Tools For Purple software's CMVS Engine.
 - unpack `.ogv` video file and `.ogg` audio file from `.mgv` file
 - replace `.ogv` video file
 
+:: Распаковка
+MGV_Editor.exe -mode extract -mgv "op.mgv"
+
+:: Правим/меняем op.ogv (тем же кодеком, тем же разрешением и fps)
+
+:: Упаковка
+MGV_Editor.exe -mode replace -mgv "op.mgv" -ogv "op.ogv"
+
+
 ### VFS_Extract
 extract file by file name via hook the function that create pack stream to get the pack stream obj.
 
