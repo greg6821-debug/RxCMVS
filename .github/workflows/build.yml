@@ -1,48 +1,57 @@
-name: Build MGV Editor
+name: Build CMVS Tools
+
+# Полная сборка всех инструментов RxCMVS под Windows x86 (Win32) Release.
+# Почему x86:
+#  - VFS_Hook / VFS_Extract собираются только при CMAKE_SIZEOF_VOID_P == 4
+#    (см. src/VFS_*/CMakeLists.txt и lib/CMVS/CMakeLists.txt).
+#  - third/libwebp содержит только 32-битный libwebp.lib, который lib/CMVS
+#    линкует безусловно — 64-битная сборка без правок не слинкуется.
 
 on:
+  push:
+    branches: [main, master]
+  pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build:
+  build-win32:
+    name: Windows x86 (Win32) — Release
     runs-on: windows-latest
 
-    strategy:
-      matrix:
-        triplet: [x64-windows, x86-windows]
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Setup MSBuild and Tools
-      uses: microsoft/setup-msbuild@v2
+      - name: Set up MSVC x86 developer environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86          # x86 native toolchain -> cl.exe выдаёт 32-битный код
 
-    - name: Integrate and Run vcpkg
-      run: |
-        vcpkg integrate install
-        vcpkg install libvorbis:${{ matrix.triplet }}
+      - name: Configure (preset x86-release)
+        run: cmake --preset x86-release
 
-    - name: Fix Broken CMakeLists
-      run: |
-        $content = Get-Content src/MGV_Editor/CMakeLists.txt
-        $newContent = "cmake_minimum_required(VERSION 3.15)`n" + ($content -join "`n")
-        Set-Content src/MGV_Editor/CMakeLists.txt $newContent
+      - name: Build
+        run: cmake --build ".build/x86-release" --parallel
 
-    - name: Configure CMake
-      run: |
-        cmake -B build -S src/MGV_Editor -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
-    - name: Build Project
-      run: |
-        cmake --build build --config Release
+      - name: Collect artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          if (Test-Path ".bin/x32/release") {
+            Copy-Item ".bin/x32/release/*.exe" artifacts -ErrorAction SilentlyContinue
+            Copy-Item ".bin/x32/release/*.dll" artifacts -ErrorAction SilentlyContinue
+          }
+          Get-ChildItem artifacts | Format-Table Name, Length
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: MGV_Editor-${{ matrix.triplet }}
-        path: |
-          build/Release/*.exe
-          build/Release/*.dll
-        if-no-files-found: warn
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CMVS_Tools-x86-release
+          path: artifacts/*
+          if-no-files-found: error
+          retention-days: 30
